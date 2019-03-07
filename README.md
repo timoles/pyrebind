@@ -1,6 +1,16 @@
 pyrebind
 ========
 
+# TODO 
+
+* change readme
+
+* reset of first request
+
+* argsparse
+
+----
+
 pyrebind is a very simple DNS server written in Python for testing software against DNS rebinding vulnerabilities. The server responds to queries by randomly selecting one of the IP addresses specified in the requested domain name and returning it as the answer with the lowest possible TTL=1.
 
 https://en.wikipedia.org/wiki/DNS_rebinding

