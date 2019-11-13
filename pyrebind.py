@@ -48,7 +48,7 @@ def message_info(message):
 
 if __name__ == '__main__':
 	udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	dnsPort = 53
+	dnsPort = 7054
 	udp.bind(('',dnsPort))
 	message_info("Binding DNS server on Port: " + str(dnsPort))
 	
